@@ -118,14 +118,8 @@ function renderNewAtend(e){
     e.target.outerHTML = 
     "<div class='compra-form'>" +
     
-       '<div class="compra-buttons">' +
-            '<button style="display: inline-block;" type="button">Reiniciar compra</button>' +
-            '<button style="display: inline-block;" type="button">Cancelar compra</button>' +
-            '<button style="display: inline-block;" type="button">Completar compra</button>' +
-            '<button style="display: inline-block;" type="button" class="add-compra">Añadir compra</button>' +
-       '</div>' +
         '<div style="display: inline-block;" class="client-name">' +
-            '<label style="display: inline-block;" for="name-client">Nombre/ID de Cliente</label>' +
+            '<label style="display: inline-block;" for="name-client" >Nombre/ID de Cliente</label>' +
 
             '<input placeholder="" style="display: inline-block;" id="name-client" type="text">' +
             '<datalist id="clientes" class="auto-completed" style="display: inline-block;"></datalist>' +
@@ -134,27 +128,38 @@ function renderNewAtend(e){
         
     "</div>";
     clientNameInp = document.querySelector("#name-client");
-    var addCompra = document.querySelector(".add-compra")
-    addCompra.addEventListener("click", renderAddCompra)
+   
 }
+
 
 function renderEnterAtend(target){
     console.log("target rendering enter atend",target) 
+    var compraButtons = document.createElement("div")
+    compraButtons.className = "compra-buttons"
+    compraButtons.innerHTML = 
+            '<button style="display: inline-block;" type="button">Reiniciar compra</button>' +
+            '<button style="display: inline-block;" type="button">Cancelar compra</button>' +
+            '<button style="display: inline-block;" type="button">Completar compra</button>' +
+            '<button style="display: inline-block;" type="button" class="add-compra" onclick="renderAddCompra(event)">Añadir compra</button>'
+    
     if(target.value){
         target.parentNode.outerHTML = "<div>" +
-            "<div class='client-name modificable' id='nombre-atendido'>"+target.value+"</div>" +
-            "<div class='compras-atendido'>" +
-                "<h3>Compras de este atendido</h3>" +
-                "<ul class='compras-list'></ul>" +
-            "</div>" +
+        
+        compraButtons.outerHTML +
+        "<div class='client-name modificable' id='nombre-atendido'>"+target.value+"</div>" +
+        "<div class='compras-atendido'>" +
+            "<h3>Compras de este atendido</h3>" +
+            "<ul class='compras-list'></ul>" +
+        "</div>" +
         "</div>"
     }else{
         target.parentNode.outerHTML = "<div>" +
-            "<div class='client-name modificable' id='nombre-atendido'>(Nombre faltante)</div>" +
-            "<div class='compras-atendido'>" +
-                "<h3>Compras de este atendido</h3>" +
-                "<ul class='compras-list'></ul>" +
-            "</div>" +
+        compraButtons.outerHTML +
+        "<div class='client-name modificable' id='nombre-atendido'>(Nombre faltante)</div>" +
+        "<div class='compras-atendido'>" +
+            "<h3>Compras de este atendido</h3>" +
+            "<ul class='compras-list'></ul>" +
+        "</div>" +
         "</div>"
     }
     atendidoActual.id = getLastId("atendidos")+1
@@ -162,21 +167,22 @@ function renderEnterAtend(target){
     atendidoActual.clientId = target.value
 
 }
-
+var actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
 function renderComprasList(){
     var comprasList = document.querySelector(".compras-list")
     comprasList.innerHTML = ""
-    atendidoActual.ventasArr.forEach(function(compra){
+    for(var i = 0; i < atendidoActual.ventasArr.length; i++){
+        var compra = atendidoActual.ventasArr[i]
         var li = document.createElement("li")
-        li.textContent = compra.producto + " - " + compra.cantidad + " - " + compra.precio
+        li.textContent = compra.producto + " - x" + compra.cantidad + " $" + compra.precio + " = $" + compra.cantidad * compra.precio
         comprasList.appendChild(li)
-    })
+    }
+
 }
 function renderAgainBuyButton(e){
-    e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra">Añadir compra</button>'
-    document.querySelector(".add-compra").addEventListener("click", renderAddCompra)
+    e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra" onclick="renderAddCompra(event)">Añadir compra</button>'
 }
-var actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
+
 
 function onBuyInputChange(e){
     console.log("onBuyInputChange", e.target.value)
@@ -196,12 +202,14 @@ function onBuyInputChange(e){
 
 function onBuyAddClick(e){
     e.preventDefault()
-    var producto = searchValueOnLSById("productos", actualCompra.id)
     atendidoActual.ventasArr.push({
-        producto: producto.title,  // ← Usar referencia cacheada
-        cantidad: actualCompra.cantidad,      // ← Usar referencia cacheada
-        precio: precio // ← Este no existe!
+        producto: actualCompra.name, 
+        cantidad: actualCompra.cantidad,      
+        precio: actualCompra.precio 
     })
+    renderComprasList()
+    actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
+    renderAgainBuyButton(e)
 }
 
 function onBuyCancelClick(e){
