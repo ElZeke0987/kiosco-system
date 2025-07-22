@@ -121,6 +121,8 @@ function renderNewAtend(e){
         
     "</div>";
     clientNameInp = document.querySelector("#name-client");
+    var addCompra = document.querySelector(".add-compra")
+    addCompra.addEventListener("click", renderAddCompra)
 }
 
 function renderEnterAtend(target){
@@ -136,10 +138,12 @@ function renderEnterAtend(target){
 function renderAddCompra(e){
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
-    newCompraForm.innerHTML = "<input id='producto' type='text' placeholder='Buscar por ID de producto' class='compra-buttons'/>" +
+    newCompraForm.innerHTML = "<div>" +
+    "<input id='producto' type='text' placeholder='Buscar por ID de producto' class='compra-buttons'/>" +
     "<input id='producto' type='text' placeholder='Buscar por nombre de producto' class='compra-buttons'/>" +
     "<input id='cantidad' type='number' placeholder='Cantidad' class='compra-buttons'/>" +
-    "<button type='button' class='compra-buttons'>Agregar</button>" +
+    "<button type='button' class='compra-buttons' id='cancelar-compra'>Cancelar</button>" +
+    "<button type='button' class='compra-buttons' id='agregar-compra'>Agregar</button>" +
     "</div>";
     var inputs = newCompraForm.querySelectorAll("input");
     for (var i = 0; i < inputs.length; i++) {
@@ -167,7 +171,15 @@ function renderAddCompra(e){
             }
         });
     }
-    e.target.parentNode.replaceWith(newCompraForm)
+    e.target.replaceWith(newCompraForm)
+    var cancelarCompra = document.querySelector("#cancelar-compra")
+    var agregarCompra = document.querySelector("#agregar-compra")
+    cancelarCompra.addEventListener("click", function(e){
+        e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra">Añadir compra</button>'
+    })
+    // agregarCompra.addEventListener("click", function(){
+    //     e.target.replaceWith(newCompraForm)
+    // })
 }
 
 
@@ -248,6 +260,7 @@ function autoFunc() {
     }
     var atendidoGenerator = document.querySelector(".atend-generator")
     var compraGenerator = document.querySelector(".add-compra")
+
 
     if (window.addEventListener) {
         window.addEventListener("keypress", keypressHandler,false);
