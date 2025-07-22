@@ -99,6 +99,12 @@ function registrarCliente(clienteName){
     addOnLS("clientes", cliente)
     return cliente
 }
+
+function buscarCompras(idAtendido){
+    var atendido = searchValueOnLSById("atendidos", idAtendido)
+    return atendido.ventasArr
+}
+
 var clientNameInp;
 function renderNewAtend(e){
     
@@ -128,9 +134,21 @@ function renderNewAtend(e){
 function renderEnterAtend(target){
     console.log("target rendering enter atend",target) 
     if(target.value){
-        target.parentNode.outerHTML = "<div class='client-name modificable' id='nombre-atendido'>"+target.value+"</div>"
+        target.parentNode.outerHTML = "<div>" +
+            "<div class='client-name modificable' id='nombre-atendido'>"+target.value+"</div>" +
+            "<div class='compras-atendido'>" +
+                "<h3>Compras de este atendido</h3>" +
+                "<ul class='compras-list'></ul>" +
+            "</div>" +
+        "</div>"
     }else{
-        target.parentNode.outerHTML = "<div class='client-name modificable' id='nombre-atendido'>(Nombre faltante)</div>"
+        target.parentNode.outerHTML = "<div>" +
+            "<div class='client-name modificable' id='nombre-atendido'>(Nombre faltante)</div>" +
+            "<div class='compras-atendido'>" +
+                "<h3>Compras de este atendido</h3>" +
+                "<ul class='compras-list'></ul>" +
+            "</div>" +
+        "</div>"
     }
 
 }
@@ -144,7 +162,6 @@ function renderAddCompra(e){
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
     newCompraForm.innerHTML = "<div class='compra-buttons'>" +
-    "<input id='producto-id' list='productos-auto' type='text' placeholder='Buscar por ID de producto' class='compra-buttons'/>" +
     "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='compra-buttons'/>" +
     "<input id='cantidad' type='number' placeholder='Cantidad' class='compra-buttons'/>" +
     "<datalist id='productos-auto' class='productos-auto'></datalist>" +
@@ -162,11 +179,7 @@ function renderAddCompra(e){
     for (var j = 0; j < productos.length; j++) {
         var option = document.createElement("option");
         option.value = productos[j].id + " - " + productos[j].title;
-        if (typeof option.textContent == "undefined") {
-            option.innerText = productos[j].title;
-        } else {
-            option.textContent = productos[j].title;
-        }
+        option.textContent = productos[j].title;
         document.querySelector(".productos-auto").appendChild(option)
     }
 
