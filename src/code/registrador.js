@@ -218,35 +218,34 @@ function onBuyCancelClick(e){
     renderAgainBuyButton(e)
 }
 
-function renderOptions(list){
+function renderOptions(element){
+    console.log("renderOptions", element)
+    var list = productos
+    var element = element
+    console.log("element", element)
     for (var j = 0; j < list.length; j++) {
         var option = document.createElement("option");
         option.value = list[j].id + " " + list[j].title + " $ " + list[j].precio;
         option.textContent = list[j].title;
-        document.querySelector(".productos-auto").appendChild(option)
+        element.appendChild(option)
     }
 }
 
 function renderAddCompra(e){
+    var datalist = document.createElement("datalist")
+    datalist.id = "productos-auto"
+    renderOptions(datalist)
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
     newCompraForm.innerHTML = "<div class='compra-buttons'>" +
-    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons'/>" +
-    "<input id='cantidad' type='number' placeholder='Cantidad' class='search-buttons' onchange='onBuyInputChange(event)'>" +
-    "<datalist id='productos-auto' class='productos-auto'></datalist>" +
-    "<button type='button' class='compra-buttons' id='cancelar-compra'>Cancelar</button>" +
-    "<button type='button' class='compra-buttons' id='agregar-compra'>Agregar</button>" +
+    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons' oninput='onBuyInputChange(event)'/>" +
+    "<input id='cantidad' type='number' placeholder='Cantidad' class='search-buttons' onchange='onBuyInputChange(event)'/>" +
+    datalist.outerHTML +
+    "<button type='button' class='compra-buttons' id='cancelar-compra' onclick='onBuyCancelClick(event)'>Cancelar</button>" +
+    "<button type='button' class='compra-buttons' id='agregar-compra' onclick='onBuyAddClick(event)'>Agregar</button>" +
     "</div>";
     e.target.replaceWith(newCompraForm)
     
-    renderOptions(productos)
-
-    newCompraForm.querySelector(".search-buttons").addEventListener("input", onBuyInputChange)
-   
-    var cancelarCompra = newCompraForm.querySelector("#cancelar-compra")
-    var agregarCompra = newCompraForm.querySelector("#agregar-compra")
-    cancelarCompra.addEventListener("click", onBuyCancelClick)
-    agregarCompra.addEventListener("click", onBuyAddClick)
 }
 
 function autoFunc() {
