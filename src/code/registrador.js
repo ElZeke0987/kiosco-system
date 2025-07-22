@@ -7,6 +7,13 @@ var atendidoActual={
     ventasArr: []
 };
 
+var productos = [
+    {id: "1", title: "Huevos", precio: 100},
+    {id: "2", title: "Manzanas", precio: 200},
+    {id: "3", title: "Leche", precio: 300},
+    {id: "4", title: "Carne", precio: 400},
+    {id: "5", title: "Queso", precio: 500},
+]//JSON.parse(localStorage.getItem("productos")||"[]");
 
 function verifyCliente(cliente){//Verifica de que exista y lo devuelve o lo crea segun el caso
     var clienteObj;
@@ -150,49 +157,81 @@ function renderEnterAtend(target){
             "</div>" +
         "</div>"
     }
+    atendidoActual.id = getLastId("atendidos")+1
+    atendidoActual.nombre = target.value
+    atendidoActual.clientId = target.value
 
 }
 
+function renderComprasList(){
+    var comprasList = document.querySelector(".compras-list")
+    comprasList.innerHTML = ""
+    atendidoActual.ventasArr.forEach(function(compra){
+        var li = document.createElement("li")
+        li.textContent = compra.producto + " - " + compra.cantidad + " - " + compra.precio
+        comprasList.appendChild(li)
+    })
+}
 function renderAgainBuyButton(e){
     e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra">Añadir compra</button>'
     document.querySelector(".add-compra").addEventListener("click", renderAddCompra)
+}
+var actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
+
+function onBuyInputChange(e){
+    console.log("onBuyInputChange", e.target.value)
+    console.log("testing input",e.target.value)
+        if(e.target.id==="producto-name"){
+            var splited = e.target.value.split(" ")
+            var id = splited[0]
+            var name = splited[1]
+            var precio = splited[3]
+            actualCompra.id = id
+            actualCompra.name = name
+            actualCompra.precio = parseInt(precio)
+        }else if(e.target.id==="cantidad"){
+            actualCompra[e.target.id] = parseInt(e.target.value)
+        }
 }
 
 function renderAddCompra(e){
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
     newCompraForm.innerHTML = "<div class='compra-buttons'>" +
-    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='compra-buttons'/>" +
-    "<input id='cantidad' type='number' placeholder='Cantidad' class='compra-buttons'/>" +
+    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons'/>" +
+    "<input id='cantidad' type='number' placeholder='Cantidad' class='search-buttons' onchange='onBuyInputChange(event)'>" +
     "<datalist id='productos-auto' class='productos-auto'></datalist>" +
     "<button type='button' class='compra-buttons' id='cancelar-compra'>Cancelar</button>" +
     "<button type='button' class='compra-buttons' id='agregar-compra'>Agregar</button>" +
     "</div>";
     e.target.replaceWith(newCompraForm)
-    var productos = [
-        {id: "1", title: "Huevos", precio: 100},
-        {id: "2", title: "Manzanas", precio: 200},
-        {id: "3", title: "Leche", precio: 300},
-        {id: "4", title: "Carne", precio: 400},
-        {id: "5", title: "Queso", precio: 500},
-    ]//JSON.parse(localStorage.getItem("productos")||"[]");
+    
     for (var j = 0; j < productos.length; j++) {
         var option = document.createElement("option");
-        option.value = productos[j].id + " - " + productos[j].title;
+        option.value = productos[j].id + " " + productos[j].title + " $ " + productos[j].precio;
         option.textContent = productos[j].title;
         document.querySelector(".productos-auto").appendChild(option)
     }
-
+    newCompraForm.querySelector(".search-buttons").addEventListener("input", function(e){
+        onBuyInputChange(e)
+    })
    
     var cancelarCompra = document.querySelector("#cancelar-compra")
     var agregarCompra = document.querySelector("#agregar-compra")
     cancelarCompra.addEventListener("click", function(e){
+        actualCompra = null
         renderAgainBuyButton(e)
     })
-    agregarCompra.addEventListener("click", function(){
-        
-        registrarVenta()
-    })
+    
+    agregarCompra.addEventListener("click", function(e){
+        e.preventDefault()
+        var producto = searchValueOnLSById("productos", actualCompra.id)
+        atendidoActual.ventasArr.push({
+            producto: producto.title,  // ← Usar referencia cacheada
+            cantidad: actualCompra.cantidad,      // ← Usar referencia cacheada
+            precio: precio // ← Este no existe!
+        })
+})
 }
 
 
