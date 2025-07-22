@@ -142,29 +142,27 @@ function renderEnterAtend(target){
             '<button style="display: inline-block;" type="button">Completar compra</button>' +
             '<button style="display: inline-block;" type="button" class="add-compra" onclick="renderAddCompra(event)">Añadir compra</button>'
     
-    if(target.value){
-        target.parentNode.outerHTML = "<div>" +
-        
-        compraButtons.outerHTML +
-        "<div class='client-name modificable' id='nombre-atendido'>"+target.value+"</div>" +
-        "<div class='compras-atendido'>" +
+    var comprasList = document.createElement("div")
+    comprasList.className = "compras-list"
+    comprasList.innerHTML =
             "<h3>Compras de este atendido</h3>" +
-            "<ul class='compras-list'></ul>" +
-        "</div>" +
-        "</div>"
-    }else{
-        target.parentNode.outerHTML = "<div>" +
-        compraButtons.outerHTML +
-        "<div class='client-name modificable' id='nombre-atendido'>(Nombre faltante)</div>" +
-        "<div class='compras-atendido'>" +
-            "<h3>Compras de este atendido</h3>" +
-            "<ul class='compras-list'></ul>" +
-        "</div>" +
-        "</div>"
+            "<ul class='compras-list'></ul>" 
+    var clientName = document.createElement("div")
+    clientName.className = "client-name modificable"
+    clientName.id = "nombre-atendido"
+    clientName.textContent = target.value
+    if(!target.value){
+        clientName.textContent = "(Nombre faltante)"
     }
+    target.parentNode.outerHTML = 
+        "<div>" +
+            compraButtons.outerHTML +
+            clientName.outerHTML +
+            comprasList.outerHTML +
+        "</div>"
     atendidoActual.id = getLastId("atendidos")+1
-    atendidoActual.nombre = target.value
-    atendidoActual.clientId = target.value
+    atendidoActual.nombre = target.value || "(Nombre faltante)"
+    //atendidoActual.clientId = target.value || getLastId("clientes")+1
 
 }
 var actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
