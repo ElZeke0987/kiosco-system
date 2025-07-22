@@ -15,6 +15,12 @@ var productos = [
     {id: "5", title: "Queso", precio: 500},
 ]//JSON.parse(localStorage.getItem("productos")||"[]");
 
+var clientes = [
+    {id: "-1", title: "--Nuevo cliente--"},
+    {id: "0", title: "--Anonimo--"},
+    ...JSON.parse(localStorage.getItem("clientes")||"[]"),
+]
+
 function verifyCliente(cliente){//Verifica de que exista y lo devuelve o lo crea segun el caso
 
     var clienteObj;
@@ -82,31 +88,26 @@ function registrarVenta(idAtendido, producto, cantidad, precio){
 
 
 
-function registrarAtendido(cliente=-1){//Si no se pone nada quedara en -1 y se renderizaraa como ( Nombre faltante )
-    var atendido = atendidoActual
-
-    var cliente = verifyCliente(cliente)
-    atendido.nombre = cliente.name
-    atendido.clientId = cliente.id
-
+function registrarAtendido(){//Si no se pone nada quedara en -1 y se renderizaraa como ( Nombre faltante )
     var total = 0;
-    for(var i = 0; i < atendido.ventasArr.length; i++){
-        var venta = atendido.ventasArr[i];
+    for(var i = 0; i < atendidoActual.ventasArr.length; i++){
+        var venta = atendidoActual.ventasArr[i];
         total += venta.total
     }
-    atendido.total = total
+    atendidoActual.total = total
     
-    addOnLS("atendidos", atendido)
-    return atendido
+    addOnLS("atendidos", atendidoActual)
+    return atendidoActual
 }
 
-function registrarCliente(clienteName){
+function registrarCliente(){
+    var clienteName = prompt("Ingrese el nombre del cliente")
     var cliente;
     if(typeof clienteName == "number"){
-        cliente = {nombre: "", id: clienteName, anonimo: 1}
-        //Generar pop up porque solo se paso una ID inexistente y por ende se debe agregar el nombre
+        alert("El valor tiene que ser un nombre")
+        registrarCliente()
     }else{
-        var cliente = {nombre: clienteName, id: getLastId("clientes")+1}
+        var cliente = {nombre: clienteName, id: getLastId("clientes")+1, title: clienteName}
     }
     addOnLS("clientes", cliente)
     return cliente
@@ -117,22 +118,34 @@ function buscarCompras(idAtendido){
     return atendido.ventasArr
 }
 
+function searchByProp(list, prop, value){
+    var result;
+    for(var i = 0; i < list.length; i++){
+        if(list[i][prop] == value){
+            result = list[i]
+            break
+        }
+    }
+    return result
+}
+
 var clientNameInp;
 function renderNewAtend(e){
-    
+    var dataList = document.createElement("datalist")
+    dataList.id = "clientes-auto"
+    renderOptions(dataList, clientes)
     e.target.outerHTML = 
     "<div class='compra-form'>" +
     
         '<div style="display: inline-block;" class="client-name">' +
             '<label style="display: inline-block;" for="name-client" >Nombre/ID de Cliente</label>' +
 
-            '<input placeholder="" style="display: inline-block;" id="name-client" type="text">' +
-            '<datalist id="clientes" class="auto-completed" style="display: inline-block;"></datalist>' +
+            '<input placeholder="" style="display: inline-block;" id="name-client" list="clientes-auto"  type="text">' +
+                dataList.outerHTML +
         '</div>' +
         
         
     "</div>";
-    clientNameInp = document.querySelector("#name-client");
    
 }
 
@@ -141,7 +154,21 @@ function completarCompra(e){
 }
 
 function renderEnterAtend(target){
+
     console.log("target rendering enter atend",target) 
+    var splittedTargetValue = target.value.split(" ")
+    var id = splittedTargetValue[0]
+    var clienteObj;
+    if(id=="-1"){
+        clienteObj = registrarCliente()
+    }else{
+        clienteObj = searchByProp(clientes, "id", id)
+    }
+    id = clienteObj.id
+    var nombre = clienteObj.title
+    atendidoActual.id = getLastId("atendidos")+1
+    atendidoActual.nombre = nombre
+    atendidoActual.clientId = id
     var compraButtons = document.createElement("div")
     compraButtons.className = "compra-buttons"
     compraButtons.innerHTML = 
@@ -158,9 +185,9 @@ function renderEnterAtend(target){
     var clientName = document.createElement("div")
     clientName.className = "client-name modificable"
     clientName.id = "nombre-atendido"
-    clientName.textContent = target.value
-    if(!target.value){
-        clientName.textContent = "(Nombre faltante)"
+    clientName.textContent = "id " + id + " nombre: " + nombre
+    if(!target.value||id=="0"){
+        clientName.textContent = "--Anonimo--"
     }
     target.parentNode.outerHTML = 
         "<div>" +
@@ -168,8 +195,7 @@ function renderEnterAtend(target){
             clientName.outerHTML +
             comprasList.outerHTML +
         "</div>"
-    atendidoActual.id = getLastId("atendidos")+1
-    atendidoActual.nombre = target.value || "(Nombre faltante)"
+
     //atendidoActual.clientId = target.value || getLastId("clientes")+1
 
 }
@@ -197,10 +223,9 @@ function onBuyInputChange(e){
             var splited = e.target.value.split(" ")
             var id = splited[0]
             var name = splited[1]
-            var precio = splited[3]
             actualCompra.id = id
             actualCompra.name = name
-            actualCompra.precio = parseInt(precio)
+            actualCompra.precio = searchByProp(productos, "id", id).precio
         }else if(e.target.id==="cantidad"){
             actualCompra[e.target.id] = parseInt(e.target.value)
         }
@@ -230,8 +255,12 @@ function renderOptions(element, list=productos){
     console.log("element", element)
     for (var j = 0; j < list.length; j++) {
         var option = document.createElement("option");
-        option.value = list[j].id + " " + list[j].title + " $ " + list[j].precio;
-        option.textContent = list[j].title;
+        var textPriceToAdd = ""
+        if(list[j].precio){
+            textPriceToAdd = "$ " + list[j].precio
+        }
+        option.value = list[j].id + " - " + list[j].title;
+        option.textContent = textPriceToAdd;
         element.appendChild(option)
     }
 }
@@ -262,9 +291,8 @@ function autoFunc() {
         // 13 es el código de Enter
         if (tecla == 13) {
             if (document.activeElement.id === "name-client") {
-
-                atendidoActual.id = getLastId("atendidos")+1 // registrarAtendido(clientNameInp.value)
-                renderEnterAtend(clientNameInp)
+                console.log("enter name-client", document.activeElement.value)
+                renderEnterAtend(document.activeElement)
                 
             }
             if (document.activeElement.id === "nombre-atendido") {
