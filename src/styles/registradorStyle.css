@@ -1,0 +1,34 @@
+.atend-generator-cont{
+    width: 100%;
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.atend-generator{
+    width: 40%;
+    height: 25vh;
+    font-size: 3rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #03aad0;
+    color: #222;
+}
+.atend-generator:hover{
+    background-color: #264f58;
+    cursor: pointer;
+    color: #fff
+}
+.compra-form{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.compra-buttons{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
