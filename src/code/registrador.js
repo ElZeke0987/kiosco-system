@@ -16,6 +16,7 @@ var productos = [
 ]//JSON.parse(localStorage.getItem("productos")||"[]");
 
 function verifyCliente(cliente){//Verifica de que exista y lo devuelve o lo crea segun el caso
+
     var clienteObj;
     //Es dinamico, para cuando se pasa la ID como el nombre
     if (typeof cliente == "number"){
@@ -81,15 +82,19 @@ function registrarVenta(idAtendido, producto, cantidad, precio){
 
 
 
-function registrarAtendido(cliente=-1, total=0, pagado=0){
-    var atendido = {clientId: getLastId("atendidos"), nombre: "", total, pagado, ventasArr: []}//Si no se pone nada quedara en -1 y se renderizaraa como ( Nombre faltante )
-    
-    if(cliente!==-1) {
-        var cliente = verifyCliente(cliente)
-        atendido.nombre = cliente.name
-        atendido.clientId = cliente.id
-    }
+function registrarAtendido(cliente=-1){//Si no se pone nada quedara en -1 y se renderizaraa como ( Nombre faltante )
+    var atendido = atendidoActual
 
+    var cliente = verifyCliente(cliente)
+    atendido.nombre = cliente.name
+    atendido.clientId = cliente.id
+
+    var total = 0;
+    for(var i = 0; i < atendido.ventasArr.length; i++){
+        var venta = atendido.ventasArr[i];
+        total += venta.total
+    }
+    atendido.total = total
     
     addOnLS("atendidos", atendido)
     return atendido
@@ -131,6 +136,9 @@ function renderNewAtend(e){
    
 }
 
+function completarCompra(e){
+    registrarAtendido()
+}
 
 function renderEnterAtend(target){
     console.log("target rendering enter atend",target) 
@@ -139,7 +147,7 @@ function renderEnterAtend(target){
     compraButtons.innerHTML = 
             '<button style="display: inline-block;" type="button">Reiniciar compra</button>' +
             '<button style="display: inline-block;" type="button">Cancelar compra</button>' +
-            '<button style="display: inline-block;" type="button">Completar compra</button>' +
+            '<button style="display: inline-block;" type="button" onclick="completarCompra(event)">Completar compra</button>' +
             '<button style="display: inline-block;" type="button" class="add-compra" onclick="renderAddCompra(event)">Añadir compra</button>'
     
     var comprasList = document.createElement("div")
@@ -216,9 +224,8 @@ function onBuyCancelClick(e){
     renderAgainBuyButton(e)
 }
 
-function renderOptions(element){
+function renderOptions(element, list=productos){
     console.log("renderOptions", element)
-    var list = productos
     var element = element
     console.log("element", element)
     for (var j = 0; j < list.length; j++) {
@@ -327,21 +334,13 @@ function autoFunc() {
     if (window.addEventListener) {
         window.addEventListener("keypress", keypressHandler,false);
         window.addEventListener("mouseover", mouseHoverHandler,false);
-        if(atendidoGenerator){
-            atendidoGenerator.addEventListener("click", renderNewAtend)
-        }
-        if(compraGenerator){
-            compraGenerator.addEventListener("click", renderAddCompra)
-        }
+
+
     } else if (window.attachEvent) {
         window.attachEvent("onkeypress", keypressHandler,false);
         window.attachEvent("onmouseover", mouseHoverHandler,false);
-        if(atendidoGenerator){
-            atendidoGenerator.attachEvent("onclick", renderNewAtend)
-        }
-        if(compraGenerator){
-            compraGenerator.attachEvent("onclick", renderAddCompra)
-        }
+
+
     }
 }
 autoFunc()
