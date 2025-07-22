@@ -194,6 +194,31 @@ function onBuyInputChange(e){
         }
 }
 
+function onBuyAddClick(e){
+    e.preventDefault()
+    var producto = searchValueOnLSById("productos", actualCompra.id)
+    atendidoActual.ventasArr.push({
+        producto: producto.title,  // ← Usar referencia cacheada
+        cantidad: actualCompra.cantidad,      // ← Usar referencia cacheada
+        precio: precio // ← Este no existe!
+    })
+}
+
+function onBuyCancelClick(e){
+    e.preventDefault()
+    actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
+    renderAgainBuyButton(e)
+}
+
+function renderOptions(list){
+    for (var j = 0; j < list.length; j++) {
+        var option = document.createElement("option");
+        option.value = list[j].id + " " + list[j].title + " $ " + list[j].precio;
+        option.textContent = list[j].title;
+        document.querySelector(".productos-auto").appendChild(option)
+    }
+}
+
 function renderAddCompra(e){
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
@@ -206,35 +231,15 @@ function renderAddCompra(e){
     "</div>";
     e.target.replaceWith(newCompraForm)
     
-    for (var j = 0; j < productos.length; j++) {
-        var option = document.createElement("option");
-        option.value = productos[j].id + " " + productos[j].title + " $ " + productos[j].precio;
-        option.textContent = productos[j].title;
-        document.querySelector(".productos-auto").appendChild(option)
-    }
-    newCompraForm.querySelector(".search-buttons").addEventListener("input", function(e){
-        onBuyInputChange(e)
-    })
+    renderOptions(productos)
+
+    newCompraForm.querySelector(".search-buttons").addEventListener("input", onBuyInputChange)
    
-    var cancelarCompra = document.querySelector("#cancelar-compra")
-    var agregarCompra = document.querySelector("#agregar-compra")
-    cancelarCompra.addEventListener("click", function(e){
-        actualCompra = null
-        renderAgainBuyButton(e)
-    })
-    
-    agregarCompra.addEventListener("click", function(e){
-        e.preventDefault()
-        var producto = searchValueOnLSById("productos", actualCompra.id)
-        atendidoActual.ventasArr.push({
-            producto: producto.title,  // ← Usar referencia cacheada
-            cantidad: actualCompra.cantidad,      // ← Usar referencia cacheada
-            precio: precio // ← Este no existe!
-        })
-})
+    var cancelarCompra = newCompraForm.querySelector("#cancelar-compra")
+    var agregarCompra = newCompraForm.querySelector("#agregar-compra")
+    cancelarCompra.addEventListener("click", onBuyCancelClick)
+    agregarCompra.addEventListener("click", onBuyAddClick)
 }
-
-
 
 function autoFunc() {
     function keypressHandler(e) {
