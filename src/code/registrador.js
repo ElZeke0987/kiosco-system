@@ -143,46 +143,41 @@ function renderAgainBuyButton(e){
 function renderAddCompra(e){
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
-    newCompraForm.innerHTML = "<div>" +
-    "<input id='producto' type='text' placeholder='Buscar por ID de producto' class='compra-buttons'/>" +
-    "<input id='producto' type='text' placeholder='Buscar por nombre de producto' class='compra-buttons'/>" +
+    newCompraForm.innerHTML = "<div class='compra-buttons'>" +
+    "<input id='producto-id' list='productos-auto' type='text' placeholder='Buscar por ID de producto' class='compra-buttons'/>" +
+    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='compra-buttons'/>" +
     "<input id='cantidad' type='number' placeholder='Cantidad' class='compra-buttons'/>" +
+    "<datalist id='productos-auto' class='productos-auto'></datalist>" +
     "<button type='button' class='compra-buttons' id='cancelar-compra'>Cancelar</button>" +
     "<button type='button' class='compra-buttons' id='agregar-compra'>Agregar</button>" +
     "</div>";
-    var inputs = newCompraForm.querySelectorAll("input");
-    for (var i = 0; i < inputs.length; i++) {
-        inputs[i].addEventListener("input", function(e){
-            var value = e.target.value;
-            var list = document.createElement("datalist");
-            list.id = "productos-"+e.target.id;
-            e.target.setAttribute("list", list.id);
-            var productos = [
-                {id: "1", title: "Producto 1", precio: 100},
-                {id: "2", title: "Producto 2", precio: 200},
-                {id: "3", title: "Producto 3", precio: 300},
-                {id: "4", title: "Producto 4", precio: 400},
-                {id: "5", title: "Producto 5", precio: 500},
-            ]//JSON.parse(localStorage.getItem("productos")||"[]");
-            for (var j = 0; j < productos.length; j++) {
-                var option = document.createElement("option");
-                option.value = productos[j].id + " - " + productos[j].title;
-                if (typeof option.textContent == "undefined") {
-                    option.innerText = productos[j].title;
-                } else {
-                    option.textContent = productos[j].title;
-                }
-                list.appendChild(option);
-            }
-        });
-    }
     e.target.replaceWith(newCompraForm)
+    var productos = [
+        {id: "1", title: "Huevos", precio: 100},
+        {id: "2", title: "Manzanas", precio: 200},
+        {id: "3", title: "Leche", precio: 300},
+        {id: "4", title: "Carne", precio: 400},
+        {id: "5", title: "Queso", precio: 500},
+    ]//JSON.parse(localStorage.getItem("productos")||"[]");
+    for (var j = 0; j < productos.length; j++) {
+        var option = document.createElement("option");
+        option.value = productos[j].id + " - " + productos[j].title;
+        if (typeof option.textContent == "undefined") {
+            option.innerText = productos[j].title;
+        } else {
+            option.textContent = productos[j].title;
+        }
+        document.querySelector(".productos-auto").appendChild(option)
+    }
+
+   
     var cancelarCompra = document.querySelector("#cancelar-compra")
     var agregarCompra = document.querySelector("#agregar-compra")
     cancelarCompra.addEventListener("click", function(e){
         renderAgainBuyButton(e)
     })
     agregarCompra.addEventListener("click", function(){
+        
         registrarVenta()
     })
 }
