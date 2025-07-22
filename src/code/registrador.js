@@ -198,15 +198,17 @@ function autoFunc() {
             var hasTextInput = document.activeElement && document.activeElement.tagName === "INPUT" && document.activeElement.type === "text"
             // si se presiona la tecla 'm' (109) y hay un input de texto activo, no hacer nada
             // si no hay un input de texto activo, se renderiza una nueva comprar (renderNewAtend) en el mismo lugar que el bot  n de registrar atendido
+            console.log("hasTextInput", hasTextInput)
+            console.log("document.activeElement", document.activeElement)
             if(tecla==77 && !hasTextInput){
                 modifyMode = false
                 holdModifyMode = !holdModifyMode
-                renderEnterAtend(document.querySelector("#nombre-atendido"))
+                renderEnterAtend(document.querySelector("#name-client"))
             }
             else if (!hasTextInput) {
                 holdModifyMode = false
                 modifyMode = !modifyMode
-                renderEnterAtend(document.querySelector("#nombre-atendido"))
+                renderEnterAtend(document.querySelector("#name-client"))
             }
         }
 
@@ -215,23 +217,22 @@ function autoFunc() {
     var holdModifyMode = false;
     function mouseOutHandler(e){
         console.log("Mouse out on input")
-        if(modifyMode||holdModifyMode){
-            if(e.target.classList.contains("hover-modificable")){
-                e.target.classList.remove("hover-modificable")
-                var newDiv = document.createElement("div")
-                newDiv.className = e.target.className
-                newDiv.textContent = e.target.value
-                e.target.replaceWith(newDiv)
-                if(e.target.id=="nombre-atendido" && e.target.value !== "(Nombre faltante)"){
-                    atendidoActual["nombre-atendido"] = e.target.value//Se actualiza el nombre del atendido por el lado logico
-                }
-                modifyMode=false
+        if(e.target.classList.contains("hover-modificable")){
+            e.target.classList.remove("hover-modificable")
+            var newDiv = document.createElement("div")
+            newDiv.className = e.target.className
+            newDiv.textContent = e.target.value
+            e.target.replaceWith(newDiv)
+            if(e.target.id=="nombre-atendido" && e.target.value !== "(Nombre faltante)"){
+                atendidoActual["nombre-atendido"] = e.target.value//Se actualiza el nombre del atendido por el lado logico
             }
+            modifyMode=false
         }
+        
     }
     function mouseHoverHandler(e){
         if(modifyMode||holdModifyMode){
-            if(e.target.classList.contains("modificable")&&e.target.tagName!="INPUT"){
+            if(e.target.classList.contains("modificable") && e.target.tagName!="INPUT"){
                 e.target.classList.add("hover-modificable")
                 var newInput = document.createElement("input")
                 newInput.type = "text"
