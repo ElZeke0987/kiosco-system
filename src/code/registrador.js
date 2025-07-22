@@ -1,10 +1,9 @@
 var atendidoActual={
     id: undefined,
     ventasArr: [],
-    "nombre-atendido": undefined,
     total: 0,
     pagado: 0,
-    ventasArr: []
+    deuda: 0
 };
 
 var productos = [
@@ -95,7 +94,17 @@ function registrarAtendido(){//Si no se pone nada quedara en -1 y se renderizara
         total += venta.total
     }
     atendidoActual.total = total
-    
+    atendidoActual.pagado = prompt("Ingrese el monto pagado")
+    atendidoActual.deuda = atendidoActual.total - atendidoActual.pagado
+
+    if(atendidoActual.deuda>0){
+        alert(atendidoActual.nombre + " debe $" + atendidoActual.deuda)
+    }else if(atendidoActual.deuda<0){
+        alert(atendidoActual.nombre + " el vuelto es $" + Math.abs(atendidoActual.deuda))
+    }else{
+        alert(atendidoActual.nombre + " pago justo ($" + atendidoActual.total + ")")
+    }
+
     addOnLS("atendidos", atendidoActual)
     return atendidoActual
 }
@@ -107,7 +116,7 @@ function registrarCliente(){
         alert("El valor tiene que ser un nombre")
         registrarCliente()
     }else{
-        var cliente = {nombre: clienteName, id: getLastId("clientes")+1, title: clienteName}
+        var cliente = {id: getLastId("clientes")+1, title: clienteName, deuda: 0}
     }
     addOnLS("clientes", cliente)
     return cliente
@@ -151,6 +160,7 @@ function renderNewAtend(e){
 
 function completarCompra(e){
     registrarAtendido()
+    location.reload()
 }
 
 function renderEnterAtend(target){
@@ -222,7 +232,7 @@ function onBuyInputChange(e){
         if(e.target.id==="producto-name"){
             var splited = e.target.value.split(" ")
             var id = splited[0]
-            var name = splited[1]
+            var name = splited[2]
             actualCompra.id = id
             actualCompra.name = name
             actualCompra.precio = searchByProp(productos, "id", id).precio
@@ -236,7 +246,8 @@ function onBuyAddClick(e){
     atendidoActual.ventasArr.push({
         producto: actualCompra.name, 
         cantidad: actualCompra.cantidad,      
-        precio: actualCompra.precio 
+        precio: actualCompra.precio,
+        total: actualCompra.precio * actualCompra.cantidad
     })
     renderComprasList()
     actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
