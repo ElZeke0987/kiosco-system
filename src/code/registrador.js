@@ -135,6 +135,11 @@ function renderEnterAtend(target){
 
 }
 
+function renderAgainBuyButton(e){
+    e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra">Añadir compra</button>'
+    document.querySelector(".add-compra").addEventListener("click", renderAddCompra)
+}
+
 function renderAddCompra(e){
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
@@ -175,11 +180,11 @@ function renderAddCompra(e){
     var cancelarCompra = document.querySelector("#cancelar-compra")
     var agregarCompra = document.querySelector("#agregar-compra")
     cancelarCompra.addEventListener("click", function(e){
-        e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra">Añadir compra</button>'
+        renderAgainBuyButton(e)
     })
-    // agregarCompra.addEventListener("click", function(){
-    //     e.target.replaceWith(newCompraForm)
-    // })
+    agregarCompra.addEventListener("click", function(){
+        registrarVenta()
+    })
 }
 
 
