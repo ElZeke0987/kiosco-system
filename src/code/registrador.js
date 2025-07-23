@@ -3,7 +3,7 @@ var atendidoActual={
     ventasArr: [],
     total: 0,
     pagado: 0,
-    deuda: 0
+    vuelto: 0
 };
 
 var productos = [
@@ -28,7 +28,7 @@ function verifyCliente(cliente){//Verifica de que exista y lo devuelve o lo crea
         clienteObj = searchValueOnLSById("clientes", cliente)
         
     }else{
-        clienteObj = searchValueOnLSByPropVal("clientes", "name", cliente)
+        clienteObj = searchValueOnLSByPropVal("clientes", "title", cliente)
     }
     if(!clienteObj){//Si no existe lo crea
         return registrarCliente(cliente)
@@ -39,8 +39,13 @@ function verifyCliente(cliente){//Verifica de que exista y lo devuelve o lo crea
 
 function searchValueOnLSByPropVal(storageKey, prop, value){
     var storage = JSON.parse(localStorage.getItem(storageKey)||"[]")
+    console.log("Now searching on ", storageKey, storage)
+    console.log("value", value)
+    console.log("prop", prop)
+    
     if(prop=="id"){
-        return storage[value]
+        console.log("storage[value - 1]", storage[value - 1])
+        return storage[value - 1]
     }
     for (i=0; i<storage.length; i++){
         var item = storage[i];
@@ -51,7 +56,7 @@ function searchValueOnLSByPropVal(storageKey, prop, value){
 }
 
 function searchValueOnLSById(storageKey, id){
-    return searchValueOnLSByPropVal("id", id)
+    return searchValueOnLSByPropVal(storageKey, "id", id)
 }
 
 function getLastId(storageKey){
@@ -68,13 +73,18 @@ function addOnLS(storageKey, valueObject){
     }
 }
 
-function changeOnLS(storageKey, id, value, prop, addToArr=false){
+function changeOnLS(storageKey, id, value, prop, addToArr=false, addNumber=false    ){
     var storage = JSON.parse(localStorage.getItem(storageKey)||"[]")
     if(addToArr){
-        storage[id][prop].push(value)
-    }else{
-        storage[id][prop] = value
+        storage[id - 1][prop].push(value)
     }
+    else if(addNumber){
+        storage[id - 1][prop] = parseInt(storage[id - 1][prop]) + value
+    }
+    else{
+        storage[id - 1][prop] = value
+    }
+    
     localStorage.setItem(storageKey, JSON.stringify(storage))
 }
 
@@ -85,7 +95,20 @@ function registrarVenta(idAtendido, producto, cantidad, precio){
     //addOnLS("ventas", venta)
 }
 
+/* Deuda Systema
+    Deuda < 0 o negativa -> Debe el kiosco
+    Deuda > 0 o positiva -> Debe el cliente
+ */
 
+function getSignDeudaTotal(deudaTotal){
+    if(deudaTotal>0){
+        return "-"
+    }else if(deudaTotal<0){
+        return "+"
+    }else{
+        return ""
+    }
+}
 
 function registrarAtendido(){//Si no se pone nada quedara en -1 y se renderizaraa como ( Nombre faltante )
     var total = 0;
@@ -94,18 +117,88 @@ function registrarAtendido(){//Si no se pone nada quedara en -1 y se renderizara
         total += venta.total
     }
     atendidoActual.total = total
-    atendidoActual.pagado = prompt("Ingrese el monto pagado")
-    atendidoActual.deuda = atendidoActual.total - atendidoActual.pagado
+    atendidoActual.pagado = parseInt(prompt("Ingrese el monto pagado"))||0
+    atendidoActual.vuelto = atendidoActual.pagado - atendidoActual.total
+    if(atendidoActual.vuelto == 0){
+        if(atendidoActual.total == 0){
+            alert("No se pago ni se vendio nada :)")
+        }
+        else{
+            alert("Cliente pago justo: $", atendidoActual.pagado)
+        }
+    }else {
+        var deudaByClient = searchValueOnLSById("clientes", atendidoActual.clientId)
+         // deuda negativa (debe el kiosco) - Vuelto positivo (paga el cliente), el kiosco debe mas
+        // deuda negativa y vuelto negativo, el cliente paga  con lo que el kiosco le debe (tipo pagare)
+        // deuda negativa y vuelto positivo, mas deuda para el cliente
+        // deuda positiva y vuelto negativo, menos deuda para el cliente
+        // deuda positiva y vuelto positivo, menos deuda para el cliente
+        // deuda 0 y vuelto positivo, mas deuda para el kiosco con el cliente o pagare para el cliente
+        var deudaTotal = deudaByClient.deuda - atendidoActual.vuelto;
+        var msgToShow;
+        var tipoDeuda;
+        var extraTip;
+        var signoDeuda;
+        var signoVuelto;
 
-    if(atendidoActual.deuda>0){
-        alert(atendidoActual.nombre + " debe $" + atendidoActual.deuda)
-    }else if(atendidoActual.deuda<0){
-        alert(atendidoActual.nombre + " el vuelto es $" + Math.abs(atendidoActual.deuda))
-    }else{
-        alert(atendidoActual.nombre + " pago justo ($" + atendidoActual.total + ")")
+        if(deudaTotal<0){
+            extraTip = "(Pagare)"
+            signoDeuda = "+"
+        }else if(deudaTotal>0){
+            extraTip = "(Deuda)"
+            signoDeuda = "-"
+        }else if(deudaTotal==0){
+            extraTip = "(Deuda Neutra)"
+            signoDeuda = ""
+        }
+       
+        if(atendidoActual.vuelto<0){
+            signoVuelto = "-"
+        }else if(atendidoActual.vuelto>0){
+            signoVuelto = "+"
+        }else{
+            signoVuelto = ""
+        }
+
+        if(atendidoActual.pagado<0){
+            extraTip += "\n(Pagos negativos no se pueden hacer, siempre positivo)"
+        }
+        if(deudaTotal<0){
+            tipoDeuda = "Kiosco a Cliente"
+        }
+        else if(deudaTotal>0){
+            tipoDeuda = "Cliente a Kiosco"
+        }
+       
+        
+        if(atendidoActual.vuelto<0){// El cliente pago de menos
+            alert("El vuelto es negativo, se suma a la deuda como numero positivo")
+            deudaTotal = deudaByClient.deuda + Math.abs(atendidoActual.vuelto) //Cuando el vuelto es negativo, se suma a la deuda como numero positivo
+            msgToShow = atendidoActual.nombre + " Pago entrante:   -$" + Math.abs(atendidoActual.vuelto) +"\nDeuda anterior: " + getSignDeudaTotal(deudaByClient.deuda) + "$"+Math.abs(deudaByClient.deuda)+"\nDeuda total: " + getSignDeudaTotal(deudaTotal) + "$" + deudaTotal + "\nTipo de deuda: " + tipoDeuda + "\n" + extraTip
+        }else if(atendidoActual.vuelto>0){//El cliente pago mas de lo que debia: Vuelto / Deuda del kiosco
+            alert("El vuelto es positivo, se verifica si se resta o no de alguna deuda existente")
+            if(deudaTotal>0){ // anterior deuda positiva (debe el cliente -> kiosco) se paga ese excedente a la deuda
+                msgToShow = atendidoActual.nombre + " Deuda saldada con:   $" + Math.abs(atendidoActual.vuelto) +"\nDeuda anterior:  $"+ deudaByClient.deuda +"\nDeuda final: " + getSignDeudaTotal(deudaTotal) + "$" + deudaTotal + "\nTipo de deuda: Deuda Parcialmente Saldada" + "\n" + extraTip
+            }
+            else if(deudaTotal<0){// anterior deuda negativa (debe el kiosco -> cliente)                
+                msgToShow = "Pagare aumentado:   +$" + atendidoActual.vuelto +"\nDeuda anterior:  " + getSignDeudaTotal(deudaByClient.deuda) + "$"+ Math.abs(deudaByClient.deuda) +"\nDeuda final: +$" + Math.abs(deudaTotal) + "\nTipo de deuda: Pagare Aumentado" + "\n" + extraTip
+                
+            }
+            else if(deudaTotal==0){
+                msgToShow = atendidoActual.nombre + " Deuda SALDADA/NEUTRALIZADA con: " + signoVuelto + "$" + Math.abs(atendidoActual.vuelto) +"\nDeuda anterior: " + signoDeuda + "$"+deudaByClient.deuda+"\nDeuda final: $0" + "\nTipo de deuda: Deuda Saldada" + "\n" + extraTip
+                deudaTotal = 0
+                
+            }
+            
+        }
+        atendidoActual.deuda = 0
+        atendidoActual.vuelto = 0
+        alert(msgToShow)
+        alert("Deuda total: " + getSignDeudaTotal(deudaTotal) + "$" + Math.abs(deudaTotal) + "\nVUELTO: " + atendidoActual.vuelto)
+        changeOnLS("clientes", atendidoActual.clientId, deudaTotal, "deuda", false)
     }
-
     addOnLS("atendidos", atendidoActual)
+    console.log("Deudor actual desde el LS Test: ", searchValueOnLSById("clientes", atendidoActual.clientId))
     return atendidoActual
 }
 
@@ -160,7 +253,7 @@ function renderNewAtend(e){
 
 function completarCompra(e){
     registrarAtendido()
-    location.reload()
+    //location.reload()
 }
 
 function renderEnterAtend(target){
@@ -175,7 +268,10 @@ function renderEnterAtend(target){
         clienteObj = searchByProp(clientes, "id", id)
     }
     id = clienteObj.id
-    var nombre = clienteObj.title
+    var nombre = clienteObj.title;
+    if(id=="0"){
+        nombre = "Anonimo"
+    }
     atendidoActual.id = getLastId("atendidos")+1
     atendidoActual.nombre = nombre
     atendidoActual.clientId = id
