@@ -232,7 +232,7 @@ function onBuyInputChange(e){
         if(e.target.id==="producto-name"){
             var splited = e.target.value.split(" ")
             var id = splited[0]
-            var name = splited[2]
+            var name = searchByProp(productos, "id", id).title
             actualCompra.id = id
             actualCompra.name = name
             actualCompra.precio = searchByProp(productos, "id", id).precio
