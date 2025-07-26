@@ -220,11 +220,15 @@ function buscarCompras(idAtendido){
     return atendido.ventasArr
 }
 
-function searchByProp(list, prop, value){
+function searchByProp(list, prop, value, forRegexProp="title"){
     var result;
     for(var i = 0; i < list.length; i++){
         if(list[i][prop] == value){
             result = list[i]
+            break
+        }else if (buscarConRegex(list[i][forRegexProp], value)){
+            result = list[i]
+
             break
         }
     }
@@ -258,7 +262,7 @@ function completarCompra(e){
 
 function renderEnterAtend(target){
 
-    console.log("target rendering enter atend",target) 
+
     var splittedTargetValue = target.value.split(" ")
     var id = splittedTargetValue[0]
     var clienteObj;
@@ -323,18 +327,20 @@ function renderAgainBuyButton(e){
 
 
 function onBuyInputChange(e){
+    
     console.log("onBuyInputChange", e.target.value)
-    console.log("testing input",e.target.value)
-        if(e.target.id==="producto-name"){
-            var splited = e.target.value.split(" ")
-            var id = splited[0]
-            var name = searchByProp(productos, "id", id).title
-            actualCompra.id = id
-            actualCompra.name = name
-            actualCompra.precio = searchByProp(productos, "id", id).precio
-        }else if(e.target.id==="cantidad"){
-            actualCompra[e.target.id] = parseInt(e.target.value)
-        }
+    if(e.target.id==="producto-name"){
+        var datalist = e.target.list
+        renderOptions(datalist, productos, true, e.target.value)
+        var splited = e.target.value.split(" ")
+        var id = splited[0]
+        var name = searchByProp(productos, "id", id).title
+        actualCompra.id = id
+        actualCompra.name = name
+        actualCompra.precio = searchByProp(productos, "id", id).precio
+    }else if(e.target.id==="cantidad"){
+        actualCompra[e.target.id] = parseInt(e.target.value)
+    }
 }
 
 function onBuyAddClick(e){
@@ -356,17 +362,55 @@ function onBuyCancelClick(e){
     renderAgainBuyButton(e)
 }
 
-function renderOptions(element, list=productos){
-    console.log("renderOptions", element)
-    var element = element
-    console.log("element", element)
-    for (var j = 0; j < list.length; j++) {
+function buscarConRegex(texto, termino) {
+    var regex = new RegExp(termino, 'i'); // 'i' = case-insensitive
+    return regex.test(texto);
+}
+
+// Búsqueda con múltiples términos:
+function buscarMultiplesTerminos(textos, termino) {
+    var regex = new RegExp(termino, 'i');
+    var textosString = textos.join(" ").toLowerCase()
+    console.log("regex", regex)
+    console.log("textos", textos)
+    console.log("termino", termino.toLowerCase())
+    console.log("regex.test(" + textosString + ")", regex.test(textosString))
+
+   return regex.test(textosString)
+}
+
+function renderOptions(element, list=productos, entire=false, byValueInput){
+    element.innerHTML = ""
+    console.log("List: ", list)
+    var listToUse = list
+    var limit = 3
+    var filteredList = []
+    if(entire && byValueInput){
+        for (var j = 0; j < listToUse.length; j++) {
+            console.log("--checking--", listToUse[j])
+            if(buscarMultiplesTerminos([listToUse[j].id, listToUse[j].title], byValueInput)){
+                console.log("found", listToUse[j])
+                filteredList.push(listToUse[j])
+                var newFilteredOption = document.createElement("option");
+                newFilteredOption.value = listToUse[j].id + " - " + listToUse[j].title;
+                newFilteredOption.textContent = listToUse[j].precio;
+                element.appendChild(newFilteredOption)
+            }
+        }
+        limit = filteredList.length
+        listToUse = filteredList
+        return
+    }
+    if(byValueInput){
+        return
+    }
+    for (var j = 0; j < Math.min(limit, listToUse.length); j++) {
         var option = document.createElement("option");
         var textPriceToAdd = ""
-        if(list[j].precio){
-            textPriceToAdd = "$ " + list[j].precio
+        if(listToUse[j].precio){
+            textPriceToAdd = "$ " + listToUse[j].precio
         }
-        option.value = list[j].id + " - " + list[j].title;
+        option.value = listToUse[j].id + " - " + listToUse[j].title;
         option.textContent = textPriceToAdd;
         element.appendChild(option)
     }
@@ -375,11 +419,12 @@ function renderOptions(element, list=productos){
 function renderAddCompra(e){
     var datalist = document.createElement("datalist")
     datalist.id = "productos-auto"
-    renderOptions(datalist)
+    renderOptions(datalist, productos)
+
     var newCompraForm = document.createElement("div")
     newCompraForm.className = "new-compra-form"
     newCompraForm.innerHTML = "<div class='compra-buttons'>" +
-    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons' oninput='onBuyInputChange(event)'/>" +
+    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons' oninput='onBuyInputChange(event)' />" +
     "<input id='cantidad' type='number' placeholder='Cantidad' class='search-buttons' onchange='onBuyInputChange(event)'/>" +
     datalist.outerHTML +
     "<button type='button' class='compra-buttons' id='cancelar-compra' onclick='onBuyCancelClick(event)'>Cancelar</button>" +
@@ -427,6 +472,7 @@ function autoFunc() {
                 renderEnterAtend(document.querySelector("#name-client"))
             }
         }
+
 
     }
     var modifyMode = false;
