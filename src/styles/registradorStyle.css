@@ -11,24 +11,181 @@
     font-size: 3rem;
     border-radius: 8px;
     border: none;
-    background-color: #03aad0;
+    background-color: #d07403;
     color: #222;
 }
 .atend-generator:hover{
-    background-color: #264f58;
+    background-color: #ac2121;
     cursor: pointer;
     color: #fff
 }
-.compra-form{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+
+.search-buttons, #producto-name, #cantidad {
+    flex: 1 1 120px;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #f8fafc;
+    color: #222;
+    outline: none;
+    transition: border 0.2s;
 }
-.compra-buttons{
+.search-buttons:focus, #producto-name:focus, #cantidad:focus {
+    border-color: #03aad0;
+    background: #fff;
+}
+
+
+.atend-options-cont{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.5rem;
+    border-radius: 10px;
+    border: 5px solid #d08f03;
+    background: #888;
+    padding: 0.5rem;
+}
+
+.atend-options{
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 0.25rem;
+    background: #fff;
+    border: 1px solid #382a2a;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    color: #5a3105;
+    font-size: 1.05rem;
+    font-weight: 500;
+    box-shadow: none;
+}
+
+.atend-options:hover {
+    background: #f2fbfd;
+    color: #d07403;
+    border-color: #d07403;
+    cursor: pointer;
+}
+
+.compra-form{
+    width: 100%;
+    max-width: 430px;
+    margin: 2rem auto;
+    background: #8b380c;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 1.5rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+}
+
+.compra-buttons{
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.compra-inp-cont{
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.add-compra, #cancelar-compra, #agregar-compra {
+    padding: 0.6rem 1.1rem;
+    border: none;
+    border-radius: 6px;
+    background: #03d028;
+    color: #fff;
+    font-size: 1rem;
+
+}
+
+.compra-buttons-cont{
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+}
+
+
+#cancelar-compra {
+    background: #e94f4f;
+}
+#cancelar-compra:hover {
+    background: #a52c2c;
+}
+.compras-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0 0;
+    background: #f5f5f5;
+    border-radius: 7px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.compras-list li {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 1rem;
+    color: #222;
+}
+.compras-list li:last-child {
+    border-bottom: none;
+}
+.client-name, .client-name.modificable, #nombre-atendido {
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #264f58;
+    cursor: pointer;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    background: #eaf6fa;
+    transition: background 0.2s, color 0.2s;
+}
+.client-name.modificable.hover-modificable, #nombre-atendido.hover-modificable {
+    background: #232424;
+    color: #fff;
+}
+body {
+    background: #f8fafc;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #222;
+    margin: 0;
+    padding: 0;
+}
+nav.simple-nav {
+    color: #fff;
+    padding: 1rem 0.5rem;
+    display: flex;
+    gap: 1.2rem;
+    justify-content: flex-start;
+    align-items: center;
+}
+nav.simple-nav a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+nav.simple-nav a:hover {
+    color: #222;
 }

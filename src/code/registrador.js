@@ -241,7 +241,7 @@ function renderNewAtend(e){
     dataList.id = "clientes-auto"
     renderOptions(dataList, clientes)
     e.target.outerHTML = 
-    "<div class='compra-form'>" +
+    "<div>" +
     
         '<div style="display: inline-block;" class="client-name">' +
             '<label style="display: inline-block;" for="name-client" >Nombre/ID de Cliente</label>' +
@@ -280,12 +280,12 @@ function renderEnterAtend(target){
     atendidoActual.nombre = nombre
     atendidoActual.clientId = id
     var compraButtons = document.createElement("div")
-    compraButtons.className = "compra-buttons"
+    compraButtons.className = "atend-options-cont"
     compraButtons.innerHTML = 
-            '<button style="display: inline-block;" type="button">Reiniciar compra</button>' +
-            '<button style="display: inline-block;" type="button">Cancelar compra</button>' +
-            '<button style="display: inline-block;" type="button" onclick="completarCompra(event)">Completar compra</button>' +
-            '<button style="display: inline-block;" type="button" class="add-compra" onclick="renderAddCompra(event)">Añadir compra</button>'
+        '<button style="display: inline-block;" type="button" class="atend-options">Reiniciar compra</button>' +
+        '<button style="display: inline-block;" type="button" class="atend-options">Cancelar compra</button>' +
+        '<button style="display: inline-block;" type="button" class="atend-options" onclick="completarCompra(event)">Completar compra</button>' +
+        '<button style="display: inline-block;" type="button" class="atend-options" onclick="renderAddCompra(event)">Añadir compra</button>'
     
     var comprasList = document.createElement("div")
     comprasList.className = "compras-list"
@@ -322,7 +322,7 @@ function renderComprasList(){
 
 }
 function renderAgainBuyButton(e){
-    e.target.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="add-compra" onclick="renderAddCompra(event)">Añadir compra</button>'
+    e.target.parentNode.parentNode.outerHTML = '<button style="display: inline-block;" type="button" class="atend-options" onclick="renderAddCompra(event)">Añadir compra</button>'
 }
 
 
@@ -371,25 +371,17 @@ function buscarConRegex(texto, termino) {
 function buscarMultiplesTerminos(textos, termino) {
     var regex = new RegExp(termino, 'i');
     var textosString = textos.join(" ").toLowerCase()
-    console.log("regex", regex)
-    console.log("textos", textos)
-    console.log("termino", termino.toLowerCase())
-    console.log("regex.test(" + textosString + ")", regex.test(textosString))
-
-   return regex.test(textosString)
+    return regex.test(textosString)
 }
 
 function renderOptions(element, list=productos, entire=false, byValueInput){
     element.innerHTML = ""
-    console.log("List: ", list)
     var listToUse = list
     var limit = 3
     var filteredList = []
     if(entire && byValueInput){
         for (var j = 0; j < listToUse.length; j++) {
-            console.log("--checking--", listToUse[j])
             if(buscarMultiplesTerminos([listToUse[j].id, listToUse[j].title], byValueInput)){
-                console.log("found", listToUse[j])
                 filteredList.push(listToUse[j])
                 var newFilteredOption = document.createElement("option");
                 newFilteredOption.value = listToUse[j].id + " - " + listToUse[j].title;
@@ -422,13 +414,16 @@ function renderAddCompra(e){
     renderOptions(datalist, productos)
 
     var newCompraForm = document.createElement("div")
-    newCompraForm.className = "new-compra-form"
-    newCompraForm.innerHTML = "<div class='compra-buttons'>" +
-    "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons' oninput='onBuyInputChange(event)' />" +
-    "<input id='cantidad' type='number' placeholder='Cantidad' class='search-buttons' onchange='onBuyInputChange(event)'/>" +
-    datalist.outerHTML +
-    "<button type='button' class='compra-buttons' id='cancelar-compra' onclick='onBuyCancelClick(event)'>Cancelar</button>" +
-    "<button type='button' class='compra-buttons' id='agregar-compra' onclick='onBuyAddClick(event)'>Agregar</button>" +
+    newCompraForm.className = "compra-form"
+    newCompraForm.innerHTML =
+    "<div class='compra-inp-cont'>" +
+        "<input id='producto-name' list='productos-auto' type='text' placeholder='Buscar por nombre de producto' class='search-buttons' oninput='onBuyInputChange(event)' />" +
+        "<input id='cantidad' type='number' placeholder='Cantidad' class='search-buttons' onchange='onBuyInputChange(event)' value='1' min='1'/>" +
+        datalist.outerHTML +
+    "</div>" +
+    "<div class='compra-buttons-cont'>" +
+        "<button type='button' class='compra-buttons' id='agregar-compra' onclick='onBuyAddClick(event)'>Agregar</button>" +
+        "<button type='button' class='compra-buttons' id='cancelar-compra' onclick='onBuyCancelClick(event)'>Cancelar</button>" +
     "</div>";
     e.target.replaceWith(newCompraForm)
     
