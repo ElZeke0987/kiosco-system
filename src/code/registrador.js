@@ -117,14 +117,19 @@ function registrarAtendido(){//Si no se pone nada quedara en -1 y se renderizara
         total += venta.total
     }
     atendidoActual.total = total
-    atendidoActual.pagado = parseInt(prompt("Ingrese el monto pagado"))||0
+    var pagadoInput = prompt("Ingrese el monto pagado");
+    if (pagadoInput === null) {
+        // Usuario canceló el prompt
+        return;
+    }
+    atendidoActual.pagado = parseInt(pagadoInput) || 0;
     atendidoActual.vuelto = atendidoActual.pagado - atendidoActual.total
     if(atendidoActual.vuelto == 0){
         if(atendidoActual.total == 0){
-            alert("No se pago ni se vendio nada :)")
+            return
         }
         else{
-            alert("Cliente pago justo: $", atendidoActual.pagado)
+            alert("Cliente pago justo: $" + atendidoActual.pagado)
         }
     }else {
         var deudaByClient = searchValueOnLSById("clientes", atendidoActual.clientId)
@@ -174,7 +179,7 @@ function registrarAtendido(){//Si no se pone nada quedara en -1 y se renderizara
         if(atendidoActual.vuelto<0){// El cliente pago de menos
             alert("El vuelto es negativo, se suma a la deuda como numero positivo")
             deudaTotal = deudaByClient.deuda + Math.abs(atendidoActual.vuelto) //Cuando el vuelto es negativo, se suma a la deuda como numero positivo
-            msgToShow = atendidoActual.nombre + " Pago entrante:   -$" + Math.abs(atendidoActual.vuelto) +"\nDeuda anterior: " + getSignDeudaTotal(deudaByClient.deuda) + "$"+Math.abs(deudaByClient.deuda)+"\nDeuda total: " + getSignDeudaTotal(deudaTotal) + "$" + deudaTotal + "\nTipo de deuda: " + tipoDeuda + "\n" + extraTip
+            msgToShow = atendidoActual.nombre + " Pago entrante:   $" + Math.abs(atendidoActual.vuelto) +"\nDeuda anterior: " + getSignDeudaTotal(deudaByClient.deuda) + "$"+Math.abs(deudaByClient.deuda)+"\nDeuda total: " + getSignDeudaTotal(deudaTotal) + "$" + deudaTotal + "\nTipo de deuda: " + tipoDeuda + "\n" + extraTip
         }else if(atendidoActual.vuelto>0){//El cliente pago mas de lo que debia: Vuelto / Deuda del kiosco
             alert("El vuelto es positivo, se verifica si se resta o no de alguna deuda existente")
             if(deudaTotal>0){ // anterior deuda positiva (debe el cliente -> kiosco) se paga ese excedente a la deuda
@@ -293,11 +298,9 @@ function renderEnterAtend(target){
             "<h3>Compras de este atendido</h3>" +
             "<ul class='compras-list'></ul>" 
     var clientName = document.createElement("div")
-    clientName.className = "client-name modificable"
-    clientName.id = "nombre-atendido"
-    clientName.textContent = "id " + id + " nombre: " + nombre
+    clientName.innerHTML = "<span>Nombre: </span>" + "<span id='nombre-atendido' class=' client-name modificable'>" + nombre + "</span>" + "<span>Deuda: </span>" + "<span id='deuda-atendido' class=' client-name modificable'>" + getSignDeudaTotal(clienteObj.deuda) + "$" + Math.abs(clienteObj.deuda) + "</span>"
     if(!target.value||id=="0"){
-        clientName.textContent = "--Anonimo--"
+        clientName.innerHTML = "<span>Nombre: </span>" + "<span id='nombre-atendido' class=' client-name modificable'>Anonimo</span>"
     }
     target.parentNode.outerHTML = 
         "<div>" +
@@ -309,7 +312,7 @@ function renderEnterAtend(target){
     //atendidoActual.clientId = target.value || getLastId("clientes")+1
 
 }
-var actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
+var actualCompra = {id: -1, name: "", cantidad: 1, precio: 0};
 function renderComprasList(){
     var comprasList = document.querySelector(".compras-list")
     comprasList.innerHTML = ""
@@ -344,6 +347,10 @@ function onBuyInputChange(e){
 }
 
 function onBuyAddClick(e){
+    if(actualCompra.id == -1){
+        alert("Debe seleccionar un producto")
+        return
+    }
     e.preventDefault()
     atendidoActual.ventasArr.push({
         producto: actualCompra.name, 
@@ -352,7 +359,7 @@ function onBuyAddClick(e){
         total: actualCompra.precio * actualCompra.cantidad
     })
     renderComprasList()
-    actualCompra = {id: -1, name: "", cantidad: 0, precio: 0};
+    actualCompra = {id: -1, name: "", cantidad: 1, precio: 0};
     renderAgainBuyButton(e)
 }
 
